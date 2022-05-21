@@ -1,9 +1,7 @@
 # Mario Jump
-![mario_jump_app_drawer](https://user-images.githubusercontent.com/16728804/169667430-0fe73275-4a3d-43ce-9b9a-1d2b15d42ab5.png)
-![mario_jump_inactive](https://user-images.githubusercontent.com/16728804/169667429-dfbcad4d-55b5-454a-9ebc-21f51d72be05.png)
-![mario_jump_active](https://user-images.githubusercontent.com/16728804/169667434-d74a9324-d50b-46f8-af3d-8a766501feb9.png)
-
-
+<img src="https://user-images.githubusercontent.com/16728804/169667430-0fe73275-4a3d-43ce-9b9a-1d2b15d42ab5.png" width="120px" />
+<img src="https://user-images.githubusercontent.com/16728804/169667429-dfbcad4d-55b5-454a-9ebc-21f51d72be05.png" width="120px" />
+<img src="https://user-images.githubusercontent.com/16728804/169667434-d74a9324-d50b-46f8-af3d-8a766501feb9.png" width="120px" />
 
 My wife got me a Samsung Watch4 and I discovered that there weren't enough silly
 apps for the platform. So, because I'd been meaning to try and do this with my
