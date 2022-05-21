@@ -51,11 +51,11 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   static AudioCache audioPlayer = AudioCache();
-  double _totalG = 0.0;
-  double audioLockoutTime = 1000;
-  int audioLastPlay = 0;
-  int debounceCountTarget = 1;
-  int debounceCount = 0;
+  bool _isActive = false;
+  String _totalG = "0";
+  double _targetG = 3.0;
+  int _lastPlay = 0;
+  final int _lockoutMs = 1000;
 
   void playLocal() async {
     await audioPlayer.play('mario_jump_small.wav');
@@ -67,18 +67,12 @@ class _MyHomePageState extends State<MyHomePage> {
     print('init hit');
     userAccelerometerEvents.listen((UserAccelerometerEvent event) {
       setState(() {
-        _totalG = event.x.abs().roundToDouble();
+        _totalG = event.x.abs().toStringAsFixed(1);
       });
-      if (event.x.abs() > 3) {
-        debounceCount += 1;
-        if (debounceCount >= debounceCountTarget &&
-            audioLastPlay + audioLockoutTime <
-                DateTime.now().millisecondsSinceEpoch) {
-          debounceCount = 0;
-          audioLastPlay = DateTime.now().millisecondsSinceEpoch;
+      if (event.x.abs() > _targetG && _isActive) {
+        if (_lastPlay + _lockoutMs < DateTime.now().millisecondsSinceEpoch) {
+          _lastPlay = DateTime.now().millisecondsSinceEpoch;
           playLocal();
-        } else {
-          debounceCount = 0;
         }
       }
     });
@@ -86,39 +80,43 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
               'Mario Mode',
             ),
             Text(
-              '$_totalG',
-              style: Theme.of(context).textTheme.headline4,
+              _isActive ? 'Active' : 'Inactive',
+              style: Theme.of(context).textTheme.caption,
+            ),
+            Switch(
+              value: _isActive,
+              onChanged: (bool value) {
+                setState(() {
+                  _isActive = value;
+                });
+              },
+            ),
+            const Text(
+              'Activation Gs',
+            ),
+            Slider(
+                value: _targetG,
+                min: 1.0,
+                max: 10,
+                divisions: 20,
+                label: _targetG.toStringAsFixed(1),
+                onChanged: (double v) {
+                  setState(() => _targetG = v);
+                }),
+            const Text(
+              'Current Gs',
+            ),
+            Text(
+              _totalG,
             ),
           ],
         ),

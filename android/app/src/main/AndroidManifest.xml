@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.wear_accel">
    <application
-        android:label="wear_accel"
+        android:label="Mario Jump"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
