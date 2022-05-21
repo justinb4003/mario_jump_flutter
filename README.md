@@ -21,9 +21,14 @@ https://github.com/justinb4003/mario_jump_flutter/releases/tag/v0.1
 The sideloading process varies a bit by device but generally you head into
 Settings, the About section, then tap on the version number a bunch of times.
 That gets you a new Developer Mode in the Settings menu and from there you can
-enable sideloading of apps either via USB, WiFi, or Bluetooth. Personal
-preference from there is to use the official ```adb``` debugging tool for
-Android. You can find that tool in the Android command line tools package here:
+enable sideloading of apps.  Once done on a phone you can download the apk from
+a browser and there should be some option to install it. Not sure; I'm not a
+mobile developer.
+
+For the watches WiFi, or Bluetooth needs to be used
+for deployment and personal preference from there is to use the official
+```adb``` debugging tool for Android. You can find that tool in the Android
+command line tools package here:
 https://developer.android.com/studio#command-tools
 
 ## Development
