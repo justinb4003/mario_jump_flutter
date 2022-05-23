@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MyApp());
@@ -53,25 +54,57 @@ class _MyHomePageState extends State<MyHomePage> {
   static AudioCache audioPlayer = AudioCache();
   bool _isActive = false;
   String _totalG = "0";
+  String _handMode = "A";
   double _targetG = 3.0;
   int _lastPlay = 0;
-  final int _lockoutMs = 1000;
+  final int _lockoutMs = 600;
 
   void playLocal() async {
     await audioPlayer.play('mario_jump_small.wav');
   }
 
+  void loadPreferences() {
+    SharedPreferences.getInstance().then((prefs) {
+      setState(() {
+        _targetG = prefs.getDouble('targetG') ?? 3.0;
+        _handMode = prefs.getString('handMode') ?? "A";
+      });
+    });
+  }
+
+  void savePreferences() {
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.setDouble('targetG', _targetG);
+      prefs.setString('handMode', _handMode);
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+    loadPreferences();
     print('init hit');
     userAccelerometerEvents.listen((UserAccelerometerEvent event) {
+      double currentX = event.x;
       setState(() {
-        _totalG = event.x.abs().toStringAsFixed(1);
+        _totalG = currentX.abs().toStringAsFixed(1);
       });
-      if (event.x.abs() > _targetG && _isActive) {
-        if (_lastPlay + _lockoutMs < DateTime.now().millisecondsSinceEpoch) {
-          _lastPlay = DateTime.now().millisecondsSinceEpoch;
+      bool accelHit = false;
+      switch (_handMode) {
+        case "A":
+          accelHit = currentX.abs() > _targetG;
+          break;
+        case "L":
+          accelHit = currentX > _targetG;
+          break;
+        case "R":
+          accelHit = currentX < -_targetG;
+          break;
+      }
+      if (accelHit && _isActive) {
+        int now = DateTime.now().millisecondsSinceEpoch;
+        if (_lastPlay + _lockoutMs < now) {
+          _lastPlay = now;
           playLocal();
         }
       }
@@ -81,7 +114,9 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
+        body: Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(0, 20, 0, 30),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
@@ -118,9 +153,57 @@ class _MyHomePageState extends State<MyHomePage> {
             Text(
               _totalG,
             ),
+            ListTile(
+              title: const Text(
+                'Left Hand',
+                style: TextStyle(fontSize: 12),
+              ),
+              leading: Radio(
+                value: 'L',
+                groupValue: _handMode,
+                onChanged: (v) {
+                  setState(() {
+                    _handMode = v.toString();
+                  });
+                  savePreferences();
+                },
+              ),
+            ),
+            ListTile(
+              title: const Text(
+                'Right Hand',
+                style: TextStyle(fontSize: 12),
+              ),
+              leading: Radio(
+                value: 'R',
+                groupValue: _handMode,
+                onChanged: (v) {
+                  setState(() {
+                    _handMode = v.toString();
+                  });
+                  savePreferences();
+                },
+              ),
+            ),
+            ListTile(
+              title: const Text(
+                'Ambidextrous',
+                style: TextStyle(fontSize: 12),
+              ),
+              leading: Radio(
+                value: 'A',
+                groupValue: _handMode,
+                onChanged: (v) {
+                  setState(() {
+                    _handMode = v.toString();
+                  });
+                  savePreferences();
+                },
+              ),
+            ),
           ],
         ),
       ),
-    );
+    ));
   }
 }
