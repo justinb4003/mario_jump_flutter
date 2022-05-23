@@ -55,6 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _isActive = false;
   String _totalG = "0";
   String _handMode = "A";
+  String _debugMsg = "";
   double _targetG = 3.0;
   int _lastPlay = 0;
   final int _lockoutMs = 600;
@@ -85,24 +86,40 @@ class _MyHomePageState extends State<MyHomePage> {
     loadPreferences();
     print('init hit');
     userAccelerometerEvents.listen((UserAccelerometerEvent event) {
+      print(event.x);
       double currentX = event.x;
       setState(() {
         _totalG = currentX.abs().toStringAsFixed(1);
       });
       bool accelHit = false;
+      bool snapHit = false;
       switch (_handMode) {
         case "A":
           accelHit = currentX.abs() > _targetG;
+          if (accelHit) {
+            _debugMsg = "Mode A, ${currentX.abs()} > $_targetG";
+          }
           break;
         case "L":
           accelHit = currentX > _targetG;
+          snapHit = currentX < -_targetG;
+          if (accelHit) {
+            _debugMsg = "Mode L, $currentX > $_targetG";
+          }
           break;
         case "R":
           accelHit = currentX < -_targetG;
+          snapHit = currentX > _targetG;
+          if (accelHit) {
+            _debugMsg = "Mode R, $currentX < ${-_targetG}";
+          }
           break;
       }
+      int now = DateTime.now().millisecondsSinceEpoch;
+      if (snapHit) {
+        _lastPlay = now;
+      }
       if (accelHit && _isActive) {
-        int now = DateTime.now().millisecondsSinceEpoch;
         if (_lastPlay + _lockoutMs < now) {
           _lastPlay = now;
           playLocal();
@@ -153,6 +170,9 @@ class _MyHomePageState extends State<MyHomePage> {
             Text(
               _totalG,
             ),
+            Text(
+              _debugMsg,
+            ),
             ListTile(
               title: const Text(
                 'Left Hand',
@@ -164,8 +184,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 onChanged: (v) {
                   setState(() {
                     _handMode = v.toString();
+                    savePreferences();
                   });
-                  savePreferences();
                 },
               ),
             ),
@@ -180,8 +200,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 onChanged: (v) {
                   setState(() {
                     _handMode = v.toString();
+                    savePreferences();
                   });
-                  savePreferences();
                 },
               ),
             ),
@@ -196,8 +216,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 onChanged: (v) {
                   setState(() {
                     _handMode = v.toString();
+                    savePreferences();
                   });
-                  savePreferences();
                 },
               ),
             ),
