@@ -16,15 +16,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Sounds',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.blue,
       ),
       home: const MyHomePage(title: 'Mario'),
@@ -34,16 +25,6 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
@@ -52,13 +33,12 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   static AudioCache audioPlayer = AudioCache();
-  bool _isActive = false;
+  final int _lockoutMs = 600;
   String _totalG = "0";
   String _handMode = "A";
-  String _debugMsg = "";
   double _targetG = 3.0;
   int _lastPlay = 0;
-  final int _lockoutMs = 600;
+  bool _isActive = false;
 
   void playLocal() async {
     await audioPlayer.play('mario_jump_small.wav');
@@ -84,9 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     loadPreferences();
-    print('init hit');
     userAccelerometerEvents.listen((UserAccelerometerEvent event) {
-      print(event.x);
       double currentX = event.x;
       setState(() {
         _totalG = currentX.abs().toStringAsFixed(1);
@@ -96,23 +74,14 @@ class _MyHomePageState extends State<MyHomePage> {
       switch (_handMode) {
         case "A":
           accelHit = currentX.abs() > _targetG;
-          if (accelHit) {
-            _debugMsg = "Mode A, ${currentX.abs()} > $_targetG";
-          }
           break;
         case "L":
           accelHit = currentX > _targetG;
           snapHit = currentX < -_targetG;
-          if (accelHit) {
-            _debugMsg = "Mode L, $currentX > $_targetG";
-          }
           break;
         case "R":
           accelHit = currentX < -_targetG;
           snapHit = currentX > _targetG;
-          if (accelHit) {
-            _debugMsg = "Mode R, $currentX < ${-_targetG}";
-          }
           break;
       }
       int now = DateTime.now().millisecondsSinceEpoch;
@@ -131,9 +100,9 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Center(
+      body: Center(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(0, 20, 0, 30),
+        padding: const EdgeInsets.fromLTRB(0, 20, 0, 50),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
@@ -169,9 +138,6 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Text(
               _totalG,
-            ),
-            Text(
-              _debugMsg,
             ),
             ListTile(
               title: const Text(
